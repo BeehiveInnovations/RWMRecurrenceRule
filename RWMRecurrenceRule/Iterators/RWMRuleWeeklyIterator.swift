@@ -16,7 +16,13 @@ class RWMRuleWeeklyIterator: RWMRuleIterator {
         self.mode = mode
     }
 
-    func enumerateDates(with rule: RWMRecurrenceRule, startingFrom start: Date, calendar: Calendar, using block: EnumerationBlock) {
+    func enumerateDates(
+        with rule: RWMRecurrenceRule,
+        startingFrom start: Date,
+        after jumpToAfterDate: Date?,
+        calendar: Calendar,
+        using block: EnumerationBlock
+    ) {
         var result = start // first result is the start date
         let startWeekday = calendar.component(.weekday, from: start)
 
@@ -141,7 +147,10 @@ class RWMRuleWeeklyIterator: RWMRuleIterator {
             if !isExclusionDate(date: result, calendar: calendar) {
                 // Send the current result
                 var stop = false
-                block(result, &stop)
+                // TODO: Look for ways optimize this jump
+                if jumpToAfterDate == nil || result >= jumpToAfterDate! {
+                    block(result, &stop)
+                }
                 if (stop) {
                     break
                 }

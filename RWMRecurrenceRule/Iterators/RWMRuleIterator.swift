@@ -14,7 +14,31 @@ public typealias EnumerationBlock = (_ date: Date?, _ stop: inout Bool) -> Void
 protocol RWMRuleIterator {
     /// Dates that will be excluded from enumeration.
     var exclusionDates: [Date]? { get }
-    func enumerateDates(with rule: RWMRecurrenceRule, startingFrom start: Date, calendar: Calendar, using block: EnumerationBlock)
+    func enumerateDates(
+        with rule: RWMRecurrenceRule,
+        startingFrom start: Date,
+        after: Date?,
+        calendar: Calendar,
+        using block: EnumerationBlock
+    )
+}
+
+extension RWMRuleIterator {
+    @inlinable func enumerateDates(
+        with rule: RWMRecurrenceRule,
+        startingFrom start: Date,
+        after jumpToAfterDate: Date? = nil,
+        calendar: Calendar,
+        using block: EnumerationBlock
+    ) {
+        enumerateDates(
+            with: rule,
+            startingFrom: start,
+            after: jumpToAfterDate,
+            calendar: calendar,
+            using: block
+        )
+    }
 }
 
 extension RWMRuleIterator {

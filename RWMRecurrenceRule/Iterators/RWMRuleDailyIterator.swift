@@ -14,7 +14,13 @@ class RWMRuleDailyIterator: RWMRuleIterator {
         self.exclusionDates = exclusionDates
     }
 
-    func enumerateDates(with rule: RWMRecurrenceRule, startingFrom start: Date, calendar: Calendar, using block: EnumerationBlock) {
+    func enumerateDates(
+        with rule: RWMRecurrenceRule,
+        startingFrom start: Date,
+        after jumpToAfterDate: Date?,
+        calendar: Calendar,
+        using block: EnumerationBlock
+    ) {
         // TODO - support BYSETPOS
         var result = start // first result is the start date
         let interval = rule.interval ?? 1
@@ -24,37 +30,15 @@ class RWMRuleDailyIterator: RWMRuleIterator {
         if let days = rule.daysOfTheWeek {
             daysOfTheWeek = days.map { $0.dayOfTheWeek.rawValue }
         }
-
-        repeat {
-            // Check if we are past the end date or we have returned the desired count
-            if let stopDate = rule.recurrenceEnd?.endDate {
-                if result > stopDate {
-                    break
-                }
-            } else if let stopCount = rule.recurrenceEnd?.count {
-                if count >= stopCount {
-                    break
-                }
-            }
-
-            // send current result
-            var stop = false
-            if !isExclusionDate(date: result, calendar: calendar) {
-                block(result, &stop)
-            } else {
-                count -= 1
-            }
-            if (stop) {
-                break
-            }
-
+        
+        let advanceToNextInstance = {
             var attempts = 0
             while attempts < 1000 {
                 attempts += 1
                 // Calculate the next date by adding "interval" days
                 if let date = calendar.date(byAdding: .day, value: interval, to: result) {
                     result = date
-                    guard !isExclusionDate(date: result, calendar: calendar) else { continue }
+                    guard !self.isExclusionDate(date: result, calendar: calendar) else { continue }
 
                     if let months = rule.monthsOfTheYear {
                         let rmonth = calendar.component(.month, from: result)
@@ -99,6 +83,65 @@ class RWMRuleDailyIterator: RWMRuleIterator {
                     break
                 }
             }
+        }
+
+        if let jumpToAfterDate = jumpToAfterDate, jumpToAfterDate > start {
+            let components = calendar.dateComponents([.day], from: start, to: jumpToAfterDate)
+
+            // We can just jump ahead if we do not need to track count, or we can accurately estimate count
+            if rule.recurrenceEnd?.count == nil ||
+                (rule.daysOfTheWeek == nil
+                    && rule.daysOfTheMonth == nil
+                    && rule.daysOfTheYear == nil
+                    && rule.monthsOfTheYear == nil
+                    && rule.weeksOfTheYear == nil
+                    && exclusionDates == nil) {
+
+                
+                let intervalsTillAfterDate = Double(components.day ?? 0) / Double(interval)
+                var intervalsToJump = Int(intervalsTillAfterDate)
+
+                if floor(intervalsTillAfterDate) == intervalsTillAfterDate {
+                    // If there was no residual (i.e. intervalsTillAfterDate is an integer) then we go back one interval
+                    //  so we can `advanceToNextInstance` into the next instance to preserve any `daysOfTheMonth`,
+                    //  `daysOfTheYear`, etc. logic contained in `advanceToNextInstance`
+                    intervalsToJump -= 1
+                }
+
+                if intervalsToJump > 0 {
+                    result = calendar.date(byAdding: .day, value: Int(intervalsToJump) * interval, to: result) ?? result
+                    count += Int(intervalsToJump)
+                    advanceToNextInstance()
+                }
+            }
+        }
+
+        repeat {
+            // Check if we are past the end date or we have returned the desired count
+            if let stopDate = rule.recurrenceEnd?.endDate {
+                if result > stopDate {
+                    break
+                }
+            } else if let stopCount = rule.recurrenceEnd?.count {
+                if count >= stopCount {
+                    break
+                }
+            }
+
+            // send current result
+            var stop = false
+            if !isExclusionDate(date: result, calendar: calendar) {
+                if jumpToAfterDate == nil || jumpToAfterDate! <= result {
+                    block(result, &stop)
+                }
+            } else {
+                count -= 1
+            }
+            if (stop) {
+                break
+            }
+
+            advanceToNextInstance()
         } while !done
     }
 }

@@ -24,7 +24,7 @@ public extension EKEvent {
     /// dates are calculated separately based on the event's recurrence rule.
     ///
     /// - Parameter block: A closure that is called with each event date
-    func enumerateDates(using block: (_ date: Date?, _ stop: inout Bool) -> Void) {
+    func enumerateDates(after date: Date? = nil, using block: (_ date: Date?, _ stop: inout Bool) -> Void) {
         // According to the EventKit documentation, an event can only have 0 or 1 recurrence rules. This logic follows
         // that assumption.
         if let rules = self.recurrenceRules, rules.count > 0 {
@@ -49,7 +49,7 @@ public extension EKEvent {
     func nextRecurrence(after date: Date = Date()) -> Date? {
         var result: Date? = nil
 
-        self.enumerateDates { (rdate, stop) in
+        self.enumerateDates(after: date) { (rdate, stop) in
             if let rdate = rdate, rdate > date {
                 result = rdate
                 stop = true
@@ -68,7 +68,7 @@ public extension EKEvent {
     func includes(date: Date, exact: Bool = false) -> Bool {
         var result = false
 
-        self.enumerateDates { (rdate, stop) in
+        self.enumerateDates(after: date) { (rdate, stop) in
             if let rdate = rdate {
                 if (exact && rdate == date) || (!exact && Calendar.current.isDate(rdate, inSameDayAs: date)) {
                     result = true

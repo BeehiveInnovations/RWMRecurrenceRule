@@ -22,11 +22,20 @@ class RWMRecurrenceRuleBase: XCTestCase {
         return res
     }()
 
-    func run(rule: String, timeZone: TimeZone? = nil, mode: RWMRuleScheduler.Mode = .standard, start: Date, max: Int = 200, exclusionDates: [Date]? = nil, results: [String]) {
+    func run(
+        rule: String,
+        timeZone: TimeZone? = nil,
+        mode: RWMRuleScheduler.Mode = .standard,
+        start: Date,
+        after: Date? = nil,
+        max: Int = 200,
+        exclusionDates: [Date]? = nil,
+        results: [String]
+    ) {
         run(rule: rule) { (rule) in
             var dates = [Date]()
             let scheduler = RWMRuleScheduler(rule: rule, timeZone: timeZone, exclusionDates: exclusionDates, mode: mode)
-            scheduler.enumerateDates(startingFrom: start, using: { (date, stop) in
+            scheduler.enumerateDates(startingFrom: start, after: after, using: { (date, stop) in
                 if let date = date {
                     dates.append(date)
                     if dates.count >= max {
@@ -40,11 +49,11 @@ class RWMRecurrenceRuleBase: XCTestCase {
         }
     }
 
-    func run(rule: String, start: Date, last: Date? = nil, count: Int, max: Int = 200) {
+    func run(rule: String, start: Date, after date: Date? = nil, last: Date? = nil, count: Int, max: Int = 200) {
         run(rule: rule) { (rule) in
             var dates = [Date]()
             let scheduler = RWMRuleScheduler(rule: rule)
-            scheduler.enumerateDates(startingFrom: start, using: { (date, stop) in
+            scheduler.enumerateDates(startingFrom: start, after: date, using: { (date, stop) in
                 if let date = date {
                     dates.append(date)
                     if dates.count >= max {

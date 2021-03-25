@@ -643,5 +643,28 @@ class RWMDailyTests: RWMRecurrenceRuleBase {
              "2024-01-27T09:00:00", "2024-01-28T09:00:00", "2024-02-25T09:00:00", "2026-01-31T09:00:00"]
         )
     }
+    func testDaily02a() {
+        // Start 20180517T090000
+        // Daily every four days
+        let start = calendar.date(from: DateComponents(year: 2018, month: 5, day: 17, hour: 9))!
+        let after = calendar.date(from: DateComponents(year: 2018, month: 6, day: 10, hour: 9))!
+        run(rule: "RRULE:FREQ=DAILY;INTERVAL=4;COUNT=10", start: start, after: after, results:
+            ["2018-06-10T09:00:00", "2018-06-14T09:00:00",
+             "2018-06-18T09:00:00", "2018-06-22T09:00:00"]
+        )
+    }
 
+    func testDaily06a() {
+        // Start 20180517T090000
+        // Every other day in July
+        let start = calendar.date(from: DateComponents(year: 2018, month: 5, day: 17, hour: 9))!
+        let after = calendar.date(from: DateComponents(year: 2018, month: 7, day: 28, hour: 9))!
+        run(rule: "RRULE:FREQ=DAILY;BYMONTH=7;INTERVAL=2;COUNT=30", start: start, after: after, results:
+            ["2018-07-28T09:00:00", "2018-07-30T09:00:00",
+             "2019-07-01T09:00:00", "2019-07-03T09:00:00", "2019-07-05T09:00:00", "2019-07-07T09:00:00",
+             "2019-07-09T09:00:00", "2019-07-11T09:00:00", "2019-07-13T09:00:00", "2019-07-15T09:00:00",
+             "2019-07-17T09:00:00", "2019-07-19T09:00:00", "2019-07-21T09:00:00", "2019-07-23T09:00:00",
+             "2019-07-25T09:00:00", "2019-07-27T09:00:00"]
+        )
+    }
 }

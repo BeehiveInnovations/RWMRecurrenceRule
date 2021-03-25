@@ -14,7 +14,13 @@ class RWMRuleMonthlyIterator: RWMRuleIterator {
         self.exclusionDates = exclusionDates
     }
 
-    func enumerateDates(with rule: RWMRecurrenceRule, startingFrom start: Date, calendar: Calendar, using block: EnumerationBlock) {
+    func enumerateDates(
+        with rule: RWMRecurrenceRule,
+        startingFrom start: Date,
+        after jumpToAfterDate: Date?,
+        calendar: Calendar,
+        using block: EnumerationBlock
+    ) {
         var result = start
         var weekdays = [RWMRecurrenceDayOfWeek]()
         var monthDays = [Int]()
@@ -186,7 +192,10 @@ class RWMRuleMonthlyIterator: RWMRuleIterator {
             if !isExclusionDate(date: result, calendar: calendar) {
                 // Send the current result
                 var stop = false
-                block(result, &stop)
+                // TODO: Look for ways optimize this jump
+                if jumpToAfterDate == nil || result >= jumpToAfterDate! {
+                    block(result, &stop)
+                }
                 if (stop) {
                     break
                 }
