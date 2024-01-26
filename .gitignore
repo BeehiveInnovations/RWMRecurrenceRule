@@ -5,8 +5,8 @@ xcuserdata/
 DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 /archives/
-/BCCalendarDate.xcframework/
-/BCCalendarDate.xcodeproj/xcshareddata/
+/RWMRecurrenceRule.xcframework/
+/RWMRecurrenceRule.xcodeproj/xcshareddata/
 /.DerivedData/
 /DerivedDataSimulator
 /DerivedDataWatchSimulator
