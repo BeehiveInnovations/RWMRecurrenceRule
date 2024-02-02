@@ -29,7 +29,7 @@ public extension EKEvent {
         // that assumption.
         if let rules = self.recurrenceRules, rules.count > 0 {
             if let rule = RWMRecurrenceRule(recurrenceWith: rules[0]) {
-                let scheduler = RWMRuleScheduler(rule: rule, mode: .eventKit)
+              let scheduler = RWMRuleScheduler(rule: rule, timeZone: self.timeZone, mode: .eventKit)
                 scheduler.enumerateDates(startingFrom: self.startDate) { (date, stop) in
                     block(date, &stop)
                 }

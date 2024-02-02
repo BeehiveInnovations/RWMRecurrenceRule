@@ -35,6 +35,10 @@ class RWMRecurrenceRuleBase: XCTestCase {
         run(rule: rule) { (rule) in
             var dates = [Date]()
             let scheduler = RWMRuleScheduler(rule: rule, timeZone: timeZone, exclusionDates: exclusionDates, mode: mode)
+          
+            // Update formatter timezone
+            formatter.timeZone = timeZone ?? .current
+          
             scheduler.enumerateDates(startingFrom: start, after: after, using: { (date, stop) in
                 if let date = date {
                     dates.append(date)

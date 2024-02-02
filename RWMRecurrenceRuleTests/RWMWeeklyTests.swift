@@ -387,23 +387,20 @@ class RWMWeeklyTests: RWMRecurrenceRuleBase {
     }
     
     func testWeekly14() {
-        // Start 20181117T090000
-        // Weekly with with exdates.
+        // Start 20161103T080000 TZ: America/Los_Angeles (3rd, 17th, 1st Dec, 15th Dec)
+        // DST change on 6th November
+        // Two Weekly with with exdates.
         let laTimeZone = TimeZone(identifier: "America/Los_Angeles")!
         let utcTimeZone = TimeZone(identifier: "UTC")!
         
-        let start = calendar.date(from: DateComponents(timeZone: laTimeZone, year: 2020, month: 3, day: 4, hour: 9))!
-        run(rule: "RRULE:FREQ=WEEKLY;WKST=SU;COUNT=2;BYDAY=WE", start: start, results:
-            ["2020-03-04T09:00:00", "2020-03-11T09:00:00"]
-        )
-        
-        // TODO: Fix these tests for someone not currently in US
-        run(rule: "RRULE:FREQ=WEEKLY;WKST=SU;COUNT=2;BYDAY=WE", timeZone: utcTimeZone, start: start, results:
-            ["2020-03-04T09:00:00", "2020-03-11T10:00:00"]
-        )
-        
-        run(rule: "RRULE:FREQ=WEEKLY;WKST=SU;COUNT=2;BYDAY=WE", timeZone: laTimeZone, start: start, results:
-            ["2020-03-04T09:00:00", "2020-03-11T09:00:00"]
+        let start = calendar.date(from: DateComponents(timeZone: laTimeZone, year: 2016, month: 11, day: 3, hour: 8))!
+        let exclusionDate = calendar.date(from: DateComponents(timeZone: laTimeZone, year: 2016, month: 12, day: 1, hour: 8))!
+      
+        run(rule: "RRULE:FREQ=WEEKLY;INTERVAL=2;WKST=SU;BYDAY=TH;UNTIL=20170207T075959Z", timeZone: laTimeZone, start: start, exclusionDates: [exclusionDate], results:
+            ["2016-11-03T08:00:00", "2016-11-17T08:00:00",
+             "2016-12-15T08:00:00", "2016-12-29T08:00:00",
+             "2017-01-12T08:00:00", "2017-01-26T08:00:00"]
         )
     }
+  
 }
